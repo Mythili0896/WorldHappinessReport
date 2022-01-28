@@ -1,0 +1,101 @@
+---
+title: "NEURAL NETWORKS"
+author: "Mythili Rajaram"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse) 
+library(neuralnet)
+```
+
+
+```{r}
+#Happiness Score
+ggplot(data=happy, aes(Score))+
+  geom_histogram(binwidth=0.5, fill="red")
+```
+
+
+```{r}
+#GDP
+ggplot(data=happy, aes(GDP.per.capita))+
+  geom_histogram(binwidth=0.25, fill="hotpink4")
+```
+```{r}
+#GDP & Happiness Score
+ggplot(data=happy)+
+  geom_smooth(aes(GDP.per.capita, Score), fill="hotpink3")
+```
+
+```{r}
+#GDP & Corruption
+ggplot(data=happy)+
+  geom_smooth(aes(GDP.per.capita, Perceptions.of.corruption), fill="hotpink3")
+```
+```{r}
+tb <- happy %>% filter(Overall.rank > 145 | Overall.rank < 11) %>% arrange(Overall.rank)
+tb
+```
+```{r}
+tb %>%
+  arrange(Score) %>%  
+  mutate(name=factor(Country.or.region, levels=Country.or.region)) %>%   
+  ggplot( aes(x=Country.or.region, y=Score)) +
+  geom_segment( aes(xend=Country.or.region, yend=0)) +
+  geom_point( size=4, color="orange") +
+  coord_flip() +
+  theme_bw() +
+  xlab("")
+```
+
+NEURAL NETWORKS
+
+```{r}
+NN <- neuralnet(Score~GDP.per.capita+Social.support+Healthy.life.expectancy+Freedom.to.make.life.choices,
+                 data=happy, hidden=c(2,2), act.fct = "logistic")
+```
+
+```{r}
+head(NN$net.result)
+```
+```{r}
+plot(NN)
+```
+```{r}
+Score <- happy$Score
+
+happy2 <- select(happy, GDP.per.capita,Social.support,Healthy.life.expectancy,Freedom.to.make.life.choices)
+
+output <- compute(NN, happy2)
+p1 <- output$net.result
+pred1 <- ifelse(p1>5.4, 1, 0)
+Score <- ifelse(Score>5.4, 1, 0)
+
+tab1 <- table(pred1, Score)
+tab1
+
+
+```
+
+```{r}
+# ACCURACY
+Accuracy <- (69+69)/(69+69+8+10)
+Accuracy
+```
+```{r}
+#PRECISION
+Precision <- (69)/(69+8)
+Precision
+```
+
+```{r}
+#RECALL
+Recall <- (69)/(69+10)
+Recall
+```
+```{r}
+f1 = 2*Precision*Recall/(Precision + Recall)
+f1
+```
+
